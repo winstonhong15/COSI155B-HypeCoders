@@ -18,7 +18,7 @@ The user moves a cube around the board trying to knock balls into a cone
 	var npc;
 
 	var endScene, endCamera, endText;
-
+	var loseScene, loseText;
 
 
 
@@ -38,7 +38,17 @@ The user moves a cube around the board trying to knock balls into a cone
 	animate();  // start the animation loop!
 
 
-
+	function createLoseScene(){
+		loseScene = initScene();
+		loseText = createSkyBox('youlose.png', 10);
+		loseScene.add(loseText);
+		var light1 = createPointLight();
+		light1.position.set(0,200,20);
+		loseScene.add(light1);
+		endCamera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
+		endCamera.position.set(0,50,1);
+		endCamera.lookAt(0,0,0);
+	}
 
 	function createEndScene(){
 		endScene = initScene();
@@ -61,6 +71,7 @@ The user moves a cube around the board trying to knock balls into a cone
       initPhysijs();
 			scene = initScene();
 			createEndScene();
+			createLoseScene();
 			initRenderer();
 			createMainScene();
 	}
@@ -117,7 +128,19 @@ The user moves a cube around the board trying to knock balls into a cone
 
       var wall = createWall(0xffaa00,50,3,1);
       wall.position.set(10,0,10);
-      scene.add(wall);
+			scene.add(wall);
+			
+			//Add one extra feature: if the ball hit the wall, health will decrease by 1
+			avatar.addEventListener('collision', function(other_object){
+				if (other_object==wall || other_object==cone){
+					console.log('hit wall or cone');
+					gameState.health -= 1; // decrease health by 1
+					if (gameState.health == 0) {
+						gameState.scene = 'youlose';
+					}
+				}
+			})
+
 			//console.dir(npc);
 			//playGameMusic();
 
@@ -142,21 +165,18 @@ The user moves a cube around the board trying to knock balls into a cone
 
 			ball.addEventListener( 'collision',
 				function( other_object, relative_velocity, relative_rotation, contact_normal ) {
-					if (other_object==avatar){
+					if (other_object == avatar){
 						console.log("ball "+i+" hit the cone");
 						soundEffect('good.wav');
 						gameState.score += 1;  // add one to the score
-						if (gameState.score==numBalls) {
-							gameState.scene='youwon';
+						if (gameState.score == numBalls) {
+							gameState.scene = 'youwon';
 						}
-            //scene.remove(ball);  // this isn't working ...
-						// make the ball drop below the scene ..
-						// threejs doesn't let us remove it from the schene...
 						this.position.y = this.position.y - 100;
 						this.__dirtyPosition = true;
 					}
           else if (other_object == cone){
-            gameState.health ++;
+            gameState.health++;
           }
 				}
 			)
@@ -385,6 +405,16 @@ The user moves a cube around the board trying to knock balls into a cone
 		if (gameState.scene == 'youwon' && event.key=='r') {
 			gameState.scene = 'main';
 			gameState.score = 0;
+			gameState.health = 10;
+			addBalls();
+			return;
+		}
+		
+		// we handle the "play again" key in the "youlose" scene
+		if (gameState.scene == 'youlose' && event.key=='r') {
+			gameState.scene = 'main';
+			gameState.score = 0;
+			gameState.health = 10;
 			addBalls();
 			return;
 		}
@@ -481,6 +511,10 @@ The user moves a cube around the board trying to knock balls into a cone
 		requestAnimationFrame( animate );
 
 		switch(gameState.scene) {
+
+			case "youlose":
+				renderer.render( loseScene, endCamera);
+				break;
 
 			case "youwon":
 				//endText.rotateY(0.005);
