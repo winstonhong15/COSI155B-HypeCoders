@@ -129,7 +129,7 @@ The user moves a cube around the board trying to knock balls into a cone
       var wall = createWall(0xffaa00,50,3,1);
       wall.position.set(10,0,10);
 			scene.add(wall);
-			
+
 			//Add one extra feature: if the ball hit the wall, health will decrease by 1
 			avatar.addEventListener('collision', function(other_object){
 				if (other_object==wall || other_object==cone){
@@ -409,7 +409,7 @@ The user moves a cube around the board trying to knock balls into a cone
 			addBalls();
 			return;
 		}
-		
+
 		// we handle the "play again" key in the "youlose" scene
 		if (gameState.scene == 'youlose' && event.key=='r') {
 			gameState.scene = 'main';
@@ -434,7 +434,6 @@ The user moves a cube around the board trying to knock balls into a cone
           break;
       case "h": controls.reset = true; break;
 
-
 			// switch cameras
 			case "1": gameState.camera = camera; break;
 			case "2": gameState.camera = avatarCam; break;
@@ -445,6 +444,8 @@ The user moves a cube around the board trying to knock balls into a cone
 			case "ArrowRight": avatarCam.translateY(-1);break;
 			case "ArrowUp": avatarCam.translateZ(-1);break;
 			case "ArrowDown": avatarCam.translateZ(1);break;
+			case "q": avatarCam.left = true;break;
+			case "e": avatarCam.right = true;break;
 
 		}
 
@@ -463,6 +464,9 @@ The user moves a cube around the board trying to knock balls into a cone
 			case "m": controls.speed = 10; break;
       case " ": controls.fly = false; break;
       case "h": controls.reset = false; break;
+			case "q": avatarCam.left = false;break;
+			case "e": avatarCam.right = false;break;
+
 		}
 	}
 
@@ -470,6 +474,19 @@ The user moves a cube around the board trying to knock balls into a cone
 		npc.lookAt(avatar.position);
 	  //npc.__dirtyPosition = true;
 		npc.setLinearVelocity(npc.getWorldDirection().multiplyScalar(-0.5));
+	}
+
+	function degInRad(deg) {
+    return deg * Math.PI / 180;
+	}
+
+	function updateAvatarCam(){
+		if(avatarCam.left){
+			avatarCam.rotateOnAxis((new THREE.Vector3(0, 1, 0)).normalize(), degInRad(0.5));
+		}
+		if(avatarCam.right){
+			avatarCam.rotateOnAxis((new THREE.Vector3(0, 1, 0)).normalize(), degInRad(-0.5));
+		}
 	}
 
   function updateAvatar(){
@@ -522,6 +539,7 @@ The user moves a cube around the board trying to knock balls into a cone
 				break;
 
 			case "main":
+				updateAvatarCam();
 				updateAvatar();
 				updateNPC();
         edgeCam.lookAt(avatar.position);
