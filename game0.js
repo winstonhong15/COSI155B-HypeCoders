@@ -416,7 +416,7 @@ The user moves a cube around the board trying to knock balls into a cone
 		//console.dir(event);
 		// first we handle the "play again" key in the "youwon" scene
 		if (gameState.scene == 'youwon' && event.key=='r') {
-			gameState.scene = 'main';
+			gameState.scene = 'GameStart';
 			gameState.score = 0;
 			gameState.health = 10;
 			addBalls();
@@ -425,7 +425,7 @@ The user moves a cube around the board trying to knock balls into a cone
 
 		// we handle the "play again" key in the "youlose" scene
 		if (gameState.scene == 'youlose' && event.key=='r') {
-			gameState.scene = 'main';
+			gameState.scene = 'GameStart';
 			gameState.score = 0;
 			gameState.health = 10;
 			addBalls();
