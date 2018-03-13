@@ -19,6 +19,7 @@ The user moves a cube around the board trying to knock balls into a cone
 
 	var endScene, endCamera, endText;
 	var loseScene, loseText;
+	var startScene;
 
 
 
@@ -29,7 +30,7 @@ The user moves a cube around the board trying to knock balls into a cone
 		    camera:camera}
 
 	var gameState =
-	     {score:0, health:10, scene:'main', camera:'none' }
+	     {score:0, health:10, scene:'GameStart', camera:'none' }
 
 
 	// Here is the main game control
@@ -64,6 +65,19 @@ The user moves a cube around the board trying to knock balls into a cone
 
 	}
 
+	function createStartScene(){
+		startScene = initScene();
+		startText = createSkyBox('GameStart.png',10);
+		startScene.add(startText);
+		var light1 = createPointLight();
+		light1.position.set(0,200,20);
+		startScene.add(light1);
+		endCamera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
+		endCamera.position.set(0,50,1);
+		endCamera.lookAt(0,0,0);
+
+	}
+
 	/**
 	  To initialize the scene, we initialize each of its components
 	*/
@@ -74,6 +88,7 @@ The user moves a cube around the board trying to knock balls into a cone
 			createLoseScene();
 			initRenderer();
 			createMainScene();
+			createStartScene();
 	}
 
 
@@ -150,8 +165,6 @@ The user moves a cube around the board trying to knock balls into a cone
 	function randN(n){
 		return Math.random()*n;
 	}
-
-
 
 
 	function addBalls(){
@@ -419,6 +432,15 @@ The user moves a cube around the board trying to knock balls into a cone
 			return;
 		}
 
+		if(gameState.scene == 'GameStart' && event.key =='p'){
+			gameState.scene = 'main';
+			gameState.score = 0;
+			gameState.health = 10;
+			addBalls();
+			return;
+		}
+
+
 		// this is the regular scene
 		switch (event.key){
 			// change the way the avatar is moving
@@ -538,6 +560,10 @@ The user moves a cube around the board trying to knock balls into a cone
 				renderer.render( endScene, endCamera );
 				break;
 
+			case "GameStart":
+				renderer.render(startScene,endCamera);
+				break;
+
 			case "main":
 				updateAvatarCam();
 				updateAvatar();
@@ -562,3 +588,4 @@ The user moves a cube around the board trying to knock balls into a cone
     + '</div>';
 
 	}
+
