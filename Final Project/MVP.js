@@ -3,8 +3,8 @@
 */
 	// global varibales
 	var scene, renderer;
-	var camera, avatarCam, edgeCam;
-  var track, wall1, wall2;
+	var camera;
+  	var track, wall1, wall2;
 
 	var car;
 
@@ -19,7 +19,7 @@
 			speed:10, fly:false, reset:false,
 		    camera:camera}
 
-	var gameState = {time:0, lap:1, scene:'GameStart', camera:'none' }
+	var gameState = {time:0, lap:1, scene:'main', camera: 'none' }
 
 	// Here is the main game control
 	init(); //
@@ -42,30 +42,36 @@
 	function init(){
     	initPhysijs();
 		scene = initScene();
-		createEndScene();
+		// createEndScene();
 		initRenderer();
 		createMainScene();
-		createStartScene();
+		// createStartScene();
 	}
 
 	function createMainScene(){
 		// TODO: setup lighting
+		var light0 = new THREE.AmbientLight( 0xffffff,0.25);
+		scene.add(light0);
 
 		// TODO: create main camera
+		camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
+		camera.position.set(0,50,0);
+		camera.lookAt(0,0,0);
+		gameState.camera=camera
 
 		// TODO: create backgroud
 
 		// TODO: create car
 
 		// TODO: create wall (track)
-    track = createGround('ground.png');
-    scene.add(track);
-    wall1 = createWall(0x663300,6,50,180);
-    scene.add(wall1);
-    wall1.position.set(-22,0,0);
-    wall2 = createWall(0x663300,6,50,180);
-    scene.add(wall2);
-    wall2.position.set(22,0,0);
+    	track = createGround('ground.png');
+    	scene.add(track);
+    	wall1 = createWall(0x663300,6,50,180);
+    	scene.add(wall1);
+    	wall1.position.set(-22,0,0);
+    	wall2 = createWall(0x663300,6,50,180);
+    	scene.add(wall2);
+    	wall2.position.set(22,0,0);
 	}
 
 	function randN(n){
@@ -82,7 +88,7 @@
 
 		// load a sound and set it as the Audio object's buffer
 		var audioLoader = new THREE.AudioLoader();
-		audioLoader.load( '/sounds/loop.mp3', function( buffer ) {
+		audioLoader.load( 'sounds/loop.mp3', function( buffer ) {
 			sound.setBuffer( buffer );
 			sound.setLoop( true );
 			sound.setVolume( 0.05 );
@@ -100,7 +106,7 @@
 
 		// load a sound and set it as the Audio object's buffer
 		var audioLoader = new THREE.AudioLoader();
-		audioLoader.load( '/sounds/'+file, function( buffer ) {
+		audioLoader.load( 'sounds/'+file, function( buffer ) {
 			sound.setBuffer( buffer );
 			sound.setLoop( false );
 			sound.setVolume( 0.5 );
@@ -114,8 +120,8 @@
 	}
 
 	function initPhysijs(){
-		Physijs.scripts.worker = '/js/physijs_worker.js';
-		Physijs.scripts.ammo = '/js/ammo.js';
+		Physijs.scripts.worker = 'js/physijs_worker.js';
+		Physijs.scripts.ammo = 'js/ammo.js';
 	}
 
 	/*
@@ -146,7 +152,7 @@
     function createGround(image){
   		// creating a textured plane which receives shadows
   		var geometry = new THREE.PlaneGeometry( 50, 20, 180 );
-  		var texture = new THREE.TextureLoader().load( '../images/'+image );
+  		var texture = new THREE.TextureLoader().load( 'images/'+image );
   		texture.wrapS = THREE.RepeatWrapping;
   		texture.wrapT = THREE.RepeatWrapping;
   		texture.repeat.set( 15, 15 );
@@ -162,11 +168,11 @@
   	}
 
     function createWall(color,w,h,d){
-      var geometry = new THREE.BoxGeometry( w, h, d);
-      var material = new THREE.MeshLambertMaterial( { color: color} );
-      mesh = new Physijs.BoxMesh( geometry, material, 0 );
-      mesh.castShadow = true;
-      return mesh;
+    	var geometry = new THREE.BoxGeometry( w, h, d);
+    	var material = new THREE.MeshLambertMaterial( { color: color} );
+    	mesh = new Physijs.BoxMesh( geometry, material, 0 );
+    	mesh.castShadow = true;
+    	return mesh;
     }
 
 
@@ -195,7 +201,7 @@
 			return;
 		}
 
-		if(gameState.scene == 'GameStart' && event.key =='p'){
+		if (gameState.scene == 'GameStart' && event.key =='p'){
 			gameState.scene = 'main';
 			gameState.score = 0;
 			gameState.health = 10;
@@ -269,7 +275,7 @@
 				renderer.render(startScene,endCamera);
 				break;
 			case "main":
-				updateCar();
+				// updateCar();
 	    		scene.simulate();
 				if (gameState.camera!= 'none'){
 					renderer.render( scene, gameState.camera );
