@@ -4,9 +4,11 @@
 	// global varibales
 	var scene, renderer;
 	var camera;
-  	var track, wall1, wall2;
+	var track, wall1, wall2;
+	var clock;
 
 	var car;
+	var wall1, wall2;
 
 	var endScene, endCamera, endText;
 	var loseScene, loseText;
@@ -22,7 +24,7 @@
 	var gameState = {time:0, lap:1, scene:'main', camera: 'none' }
 
 	// Here is the main game control
-	init(); //
+	init();
 	initControls();
 	animate();
 
@@ -50,6 +52,9 @@
 
 	function createMainScene(){
 		// TODO: setup lighting
+		var light1 = createPointLight();
+		light1.position.set(0,200,20);
+		scene.add(light1);
 		var light0 = new THREE.AmbientLight( 0xffffff,0.25);
 		scene.add(light0);
 
@@ -57,21 +62,26 @@
 		camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
 		camera.position.set(0,50,0);
 		camera.lookAt(0,0,0);
-		gameState.camera=camera
+
+		gameState.camera = camera;
 
 		// TODO: create backgroud
+		var ground = createGround('grass.png');
+		scene.add(ground);
+		var skybox = createSkyBox('sky.jpg', 1);
+		scene.add(skybox);
 
 		// TODO: create car
 
 		// TODO: create wall (track)
-    	track = createGround('ground.png');
-    	scene.add(track);
-    	wall1 = createWall(0x663300,6,50,180);
+    	wall1 = createWall(0x663300,4,10,160);
     	scene.add(wall1);
-    	wall1.position.set(-22,0,0);
-    	wall2 = createWall(0x663300,6,50,180);
+		wall1.position.set(-12,0,0);
+		wall1.__dirtyPosition=true;
+    	wall2 = createWall(0x663300,4,10,160);
     	scene.add(wall2);
-    	wall2.position.set(22,0,0);
+		wall2.position.set(12,0,0);
+		wall2.__dirtyPosition=true;
 	}
 
 	function randN(n){
@@ -115,18 +125,17 @@
 
     function createGround(image){
   		// creating a textured plane which receives shadows
-  		var geometry = new THREE.PlaneGeometry( 50, 20, 180 );
-  		var texture = new THREE.TextureLoader().load( 'images/'+image );
-  		texture.wrapS = THREE.RepeatWrapping;
-  		texture.wrapT = THREE.RepeatWrapping;
-  		texture.repeat.set( 15, 15 );
-  		var material = new THREE.MeshLambertMaterial( { color: 0xffffff,  map: texture ,side:THREE.DoubleSide} );
-  		var pmaterial = new Physijs.createMaterial(material,0.9,0.05);
-  		var mesh = new Physijs.BoxMesh( geometry, pmaterial, 0 );
-
-  		mesh.receiveShadow = true;
-  		return mesh;
-
+		var geometry = new THREE.PlaneGeometry( 180, 180, 128 );
+		var texture = new THREE.TextureLoader().load( 'images/'+image );
+		texture.wrapS = THREE.RepeatWrapping;
+		texture.wrapT = THREE.RepeatWrapping;
+		texture.repeat.set( 15, 15 );
+		var material = new THREE.MeshLambertMaterial( { color: 0xffffff,  map: texture ,side:THREE.DoubleSide} );
+		var pmaterial = new Physijs.createMaterial(material,0.9,0.05);
+		var mesh = new Physijs.BoxMesh( geometry, pmaterial, 0 );
+		mesh.receiveShadow = true;
+		mesh.rotateX(Math.PI/2);
+		return mesh
   	}
 
     function createWall(color,w,h,d){
@@ -137,10 +146,27 @@
     	return mesh;
     }
 
+	function createSkyBox(image,k){
+		// creating a textured plane which receives shadows
+		var geometry = new THREE.SphereGeometry( 80, 80, 80 );
+		var texture = new THREE.TextureLoader().load( 'images/'+image );
+		texture.wrapS = THREE.RepeatWrapping;
+		texture.wrapT = THREE.RepeatWrapping;
+		texture.repeat.set( k, k );
+		var material = new THREE.MeshLambertMaterial( { color: 0xffffff,  map: texture ,side:THREE.DoubleSide} );
+		var mesh = new THREE.Mesh( geometry, material, 0 );
+		mesh.receiveShadow = false;
+		return mesh
+	}
+
 	function initControls(){
+		//create a clock for the time-based animation ...
+		clock = new THREE.Clock();
+		clock.start();
+
 		window.addEventListener( 'keydown', keydown);
 		window.addEventListener( 'keyup',   keyup );
-	}
+  }
 
 	function keydown(event){
 		console.log("Keydown: '"+event.key+"'");
