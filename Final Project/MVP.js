@@ -78,50 +78,14 @@
 		return Math.random()*n;
 	}
 
-	function playGameMusic(){
-		// create an AudioListener and add it to the camera
-		var listener = new THREE.AudioListener();
-		camera.add( listener );
-
-		// create a global audio source
-		var sound = new THREE.Audio( listener );
-
-		// load a sound and set it as the Audio object's buffer
-		var audioLoader = new THREE.AudioLoader();
-		audioLoader.load( 'sounds/loop.mp3', function( buffer ) {
-			sound.setBuffer( buffer );
-			sound.setLoop( true );
-			sound.setVolume( 0.05 );
-			sound.play();
-		});
-	}
-
-	function soundEffect(file){
-		// create an AudioListener and add it to the camera
-		var listener = new THREE.AudioListener();
-		camera.add( listener );
-
-		// create a global audio source
-		var sound = new THREE.Audio( listener );
-
-		// load a sound and set it as the Audio object's buffer
-		var audioLoader = new THREE.AudioLoader();
-		audioLoader.load( 'sounds/'+file, function( buffer ) {
-			sound.setBuffer( buffer );
-			sound.setLoop( false );
-			sound.setVolume( 0.5 );
-			sound.play();
-		});
-	}
-
 	function initScene(){
     	var scene = new Physijs.Scene();
 		return scene;
 	}
 
 	function initPhysijs(){
-		Physijs.scripts.worker = 'js/physijs_worker.js';
-		Physijs.scripts.ammo = 'js/ammo.js';
+		Physijs.scripts.worker = '/js/physijs_worker.js';
+		Physijs.scripts.ammo = '/js/ammo.js';
 	}
 
 	/*
@@ -161,8 +125,6 @@
   		var mesh = new Physijs.BoxMesh( geometry, pmaterial, 0 );
 
   		mesh.receiveShadow = true;
-
-  		//mesh.rotateX(Math.PI/2);
   		return mesh;
 
   	}
@@ -174,8 +136,6 @@
     	mesh.castShadow = true;
     	return mesh;
     }
-
-
 
 	function initControls(){
 		window.addEventListener( 'keydown', keydown);
