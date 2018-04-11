@@ -3,8 +3,8 @@
 */
 	// global varibales
 	var scene, renderer;
-	var camera;
-	var track, wall1, wall2;
+	var camera, carCamera;
+	var wall1, wall2;
 	var clock;
 
 	var car;
@@ -21,7 +21,7 @@
 			speed:10, fly:false, reset:false,
 		    camera:camera}
 
-	var gameState = {time:0, lap:1, scene:'main', camera: 'none' }
+	var gameState = {time:0, lap:1, scene:'GameStart', camera: 'none' }
 
 	// Here is the main game control
 	init();
@@ -30,12 +30,29 @@
 
 	// TODO
 	function createEndScene(){
-
+		endScene = initScene();
+		endText = createSkyBox('end.png',10);
+		//endText.rotateX(Math.PI);
+		endScene.add(endText);
+		var light1 = createPointLight();
+		light1.position.set(0,200,20);
+		endScene.add(light1);
+		endCamera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
+		endCamera.position.set(0,50,1);
+		endCamera.lookAt(0,0,0);
 	}
 
 	// TODO
 	function createStartScene(){
-
+		startScene = initScene();
+		startText = createSkyBox('start.png',10);
+		startScene.add(startText);
+		var light1 = createPointLight();
+		light1.position.set(0,200,20);
+		startScene.add(light1);
+		endCamera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
+		endCamera.position.set(0,50,1);
+		endCamera.lookAt(0,0,0);
 	}
 
 	/**
@@ -44,10 +61,10 @@
 	function init(){
     	initPhysijs();
 		scene = initScene();
-		// createEndScene();
+		createEndScene();
 		initRenderer();
 		createMainScene();
-		// createStartScene();
+		createStartScene();
 	}
 
 	function createMainScene(){
@@ -62,26 +79,25 @@
 		camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
 		camera.position.set(0,50,0);
 		camera.lookAt(0,0,0);
-
 		gameState.camera = camera;
 
 		// TODO: create backgroud
-		var ground = createGround('grass.png');
+		var ground = createGround('ground.png');
 		scene.add(ground);
 		var skybox = createSkyBox('sky.jpg', 1);
 		scene.add(skybox);
 
+		carCam = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 1000 );
+		carCam.translateY(-4);
+		carCam.translateZ(3);
+		gameState.camera = carCam;
+
 		// TODO: create car
+		createCar();
 
 		// TODO: create wall (track)
-    	wall1 = createWall(0x663300,4,10,160);
-    	scene.add(wall1);
-		wall1.position.set(-12,0,0);
-		wall1.__dirtyPosition=true;
-    	wall2 = createWall(0x663300,4,10,160);
-    	scene.add(wall2);
-		wall2.position.set(12,0,0);
-		wall2.__dirtyPosition=true;
+		createTrack();
+
 	}
 
 	function randN(n){
@@ -137,6 +153,62 @@
 		mesh.rotateX(Math.PI/2);
 		return mesh
   	}
+
+	function createTrack(){
+		var geometry1 = new THREE.TorusGeometry( 30, 2, 40, 40);
+		var material = new THREE.MeshLambertMaterial( { color: 0x4c0099} );
+		var pmaterial = new Physijs.createMaterial(material,0, 0);
+    	var wall1 = new Physijs.ConcaveMesh( geometry1, pmaterial, 0);
+		wall1.setDamping(0.1,0.1);
+		wall1.castShadow = true;
+		wall1.rotateX(Math.PI / 2);
+
+		var geometry2 = new THREE.TorusGeometry( 50, 2, 40, 40);
+		var wall2 = new Physijs.ConcaveMesh( geometry2, pmaterial, 0);
+		wall1.__dirtyPosition = true;
+		wall2.__dirtyPosition = true;
+		wall2.rotateX(Math.PI / 2);
+		scene.add(wall1);
+		scene.add(wall2);
+	}
+
+	function createCar(){
+	// 	var loader = new THREE.JSONLoader();
+	// 	loader.load("Car.json",
+	// 		function (geometry) {
+	// 			var material = new THREE.MeshLambertMaterial({color: 0xffff00});
+	// 			var pmaterial = new Physijs.createMaterial(material, 0.9, 0.95);
+	// 			car = new Physijs.BoxMesh(geometry, pmaterial);
+	// 			car.position.set(20,0,20);
+	// 			car.translateY(20);
+	// 			car.castShadow = true;
+	// 			car.setDamping(1.0, 1.0);
+	// 			carCamera.position.set(20,0,20);
+	// 			carCamera.lookAt(0,0,0);
+	// 			car.addEventListener('collision', function(other_object){
+	// 				if (other_object == wall1 || other_object== wall2c){
+	// 					console.log('hit wall');
+	// 				}
+	// 			})
+	// 			scene.add(car);
+	// 			car.add(carCamera);
+	// 		},
+	// 	function(xhr){console.log(xhr.loaded / xhr.total*100)+'% loaded'},
+	// 	function(err){console.log("error in loading:" + err)}
+	//   );
+
+		var geometry = new THREE.BoxGeometry( 5, 5, 5);
+		var material = new THREE.MeshLambertMaterial( { color: 0xffff00} );
+  		var pmaterial = new Physijs.createMaterial(material,0.9,0.5);
+  		car = new Physijs.BoxMesh( geometry, pmaterial );
+  		car.position.set(25,2.5,25);
+  		car.setDamping(0.1,0.1);
+			carCam.position.set(0,4,0);
+			carCam.lookAt(0,4,10);
+  		car.castShadow = true;
+  		scene.add(car);
+			car.add(carCam);
+	}
 
     function createWall(color,w,h,d){
     	var geometry = new THREE.BoxGeometry( w, h, d);
@@ -202,7 +274,10 @@
 			case "a": controls.left = true; break;
 			case "d": controls.right = true; break;
 			case "m": controls.speed = 30; break;
-      		case "h": controls.reset = true; break;
+      case "h": controls.reset = true; break;
+
+			case "1": gameState.camera = camera; break;
+			case "2": gameState.camera = carCam; break;
 
 			// switch cameras
 
@@ -216,7 +291,7 @@
 			case "a": controls.left  = false; break;
 			case "d": controls.right = false; break;
 			case "m": controls.speed = 10; break;
-    		case "h": controls.reset = false; break;
+    	case "h": controls.reset = false; break;
 		}
 	}
 
@@ -227,18 +302,27 @@
 	function updateCar() {
 		var forward = car.getWorldDirection();
 
-		if (controls.fwd) {
+		if (controls.fwd){
 			car.setLinearVelocity(forward.multiplyScalar(controls.speed));
-		} else if (controls.bwd) {
+		} else if (controls.bwd){
 			car.setLinearVelocity(forward.multiplyScalar(-controls.speed));
 		} else {
 			var velocity = car.getLinearVelocity();
-			car.x=velocity.z=0;
+			velocity.x=velocity.z=0;
 			car.setLinearVelocity(velocity); //stop the xz motion
 		}
-    	if (controls.reset){
-      		car.__dirtyPosition = true;
+
+		if (controls.left){
+			car.setAngularVelocity(new THREE.Vector3(0,controls.speed*0.1,0));
+		} else if (controls.right){
+			car.setAngularVelocity(new THREE.Vector3(0,-controls.speed*0.1,0));
 		}
+
+		if (controls.reset){
+			car.__dirtyPosition = true;
+			car.position.set(25,2.5,25);
+		}
+
 	}
 
 	function distanceVector(){
@@ -261,7 +345,7 @@
 				renderer.render(startScene,endCamera);
 				break;
 			case "main":
-				// updateCar();
+				 updateCar();
 	    		scene.simulate();
 				if (gameState.camera!= 'none'){
 					renderer.render( scene, gameState.camera );
