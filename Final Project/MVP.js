@@ -5,7 +5,10 @@
 	var scene, renderer;
 	var camera, carCamera;
 	var wall1, wall2;
-	var clock;
+	var minute=0;
+	var second=0;
+	var millisecond=0;
+	var int;
 
 	var car;
 	var wall1, wall2;
@@ -27,6 +30,35 @@
 	init();
 	initControls();
 	animate();
+
+	//reset the timer
+	function Reset(){
+		window.clearInterval(int);
+		millisecond=minute=second=0;
+		document.getElementById('timetext').value='00:00:000';
+	}
+
+	function start(){
+		int=setInterval(timer,50);
+	}
+
+	//timing
+	function timer(){
+		millisecond=millisecond+50;
+		if(millisecond>=1000){
+			millisecond=0;
+			second=second+1;
+		}
+		if(second>=60){
+			second=0;
+			minute=minute+1;
+		}
+		document.getElementById('timetext').value=minute+':'+second+':'+millisecond;
+	}
+
+	function stop(){
+		window.clearInterval(int);
+	}
 
 	// TODO
 	function createEndScene(){
@@ -82,10 +114,10 @@
 		gameState.camera = camera;
 
 		// TODO: create backgroud
-		var ground = createGround('ground.png');
+		var ground = createSkyBox('ground.png');
 		scene.add(ground);
-		var skybox = createSkyBox('sky.jpg', 1);
-		scene.add(skybox);
+		//var skybox = createSkyBox('sky.jpg', 1);
+		//scene.add(skybox);
 
 		carCam = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 1000 );
 		carCam.translateY(-4);
@@ -156,7 +188,7 @@
 
 	function createTrack(){
 		var geometry1 = new THREE.TorusGeometry( 30, 2, 40, 40);
-		var material = new THREE.MeshLambertMaterial( { color: 0x4c0099} );
+		var material = new THREE.MeshLambertMaterial( { color: 0x994c00} );
 		var pmaterial = new Physijs.createMaterial(material,0, 0);
     	var wall1 = new Physijs.ConcaveMesh( geometry1, pmaterial, 0);
 		wall1.setDamping(0.1,0.1);
@@ -173,31 +205,33 @@
 	}
 
 	function createCar(){
-	// 	var loader = new THREE.JSONLoader();
-	// 	loader.load("Car.json",
-	// 		function (geometry) {
-	// 			var material = new THREE.MeshLambertMaterial({color: 0xffff00});
-	// 			var pmaterial = new Physijs.createMaterial(material, 0.9, 0.95);
-	// 			car = new Physijs.BoxMesh(geometry, pmaterial);
-	// 			car.position.set(20,0,20);
-	// 			car.translateY(20);
-	// 			car.castShadow = true;
-	// 			car.setDamping(1.0, 1.0);
-	// 			carCamera.position.set(20,0,20);
-	// 			carCamera.lookAt(0,0,0);
-	// 			car.addEventListener('collision', function(other_object){
-	// 				if (other_object == wall1 || other_object== wall2c){
-	// 					console.log('hit wall');
-	// 				}
-	// 			})
-	// 			scene.add(car);
-	// 			car.add(carCamera);
-	// 		},
-	// 	function(xhr){console.log(xhr.loaded / xhr.total*100)+'% loaded'},
-	// 	function(err){console.log("error in loading:" + err)}
-	//   );
+		/*
+	 		var loader = new THREE.JSONLoader();
+	 		loader.load("modules/squirtle-pokemon-go.json",
+	 			function (geometry) {
+	 				var material = new THREE.MeshLambertMaterial({color: 0xffff00});
+	 				var pmaterial = new Physijs.createMaterial(material, 0.9, 0.95);
+					car = new Physijs.BoxMesh(geometry, pmaterial);
+					car.position.set(20,0,20);
+	 				car.translateY(20);
+	 				car.castShadow = true;
+	 				car.setDamping(1.0, 1.0);
+					carCamera.position.set(20,0,20);
+					carCamera.lookAt(0,0,0);
+	 				car.addEventListener('collision', function(other_object){
+						if (other_object == wall1 || other_object== wall2c){
+							console.log('hit wall');
+	 					}
+	 				})
+	 				scene.add(car);
+	 				car.add(carCamera);
+	 			},
+	 		function(xhr){console.log(xhr.loaded / xhr.total*100)+'% loaded'},
+	 		function(err){console.log("error in loading:" + err)}
+	   	);
+			*/
 
-		var geometry = new THREE.BoxGeometry( 5, 5, 5);
+		var geometry = new THREE.BoxGeometry(5,5,5);
 		var material = new THREE.MeshLambertMaterial( { color: 0xffff00} );
   		var pmaterial = new Physijs.createMaterial(material,0.9,0.5);
   		car = new Physijs.BoxMesh( geometry, pmaterial );
@@ -206,8 +240,10 @@
 			carCam.position.set(0,4,0);
 			carCam.lookAt(0,4,10);
   		car.castShadow = true;
+
   		scene.add(car);
 			car.add(carCam);
+
 	}
 
     function createWall(color,w,h,d){
@@ -224,7 +260,7 @@
 		var texture = new THREE.TextureLoader().load( 'images/'+image );
 		texture.wrapS = THREE.RepeatWrapping;
 		texture.wrapT = THREE.RepeatWrapping;
-		texture.repeat.set( k, k );
+		texture.repeat.set( 1, 1 );
 		var material = new THREE.MeshLambertMaterial( { color: 0xffffff,  map: texture ,side:THREE.DoubleSide} );
 		var mesh = new THREE.Mesh( geometry, material, 0 );
 		mesh.receiveShadow = false;
