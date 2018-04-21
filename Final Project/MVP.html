@@ -14,11 +14,14 @@ that cast shadows!
 	</head>
 	<body>
 		<script src="../three.js"></script>
-    	<script src="/js/physi.js"></script>
+    <script src="/js/physi.js"></script>
 		<script src="../libs/dat.gui.min.js"></script>
 		<script src="../loaders/OBJLoader.js"></script>
-		<script src="mvp.js"></script>
+		<script src="mvp.js" type="text/javascript"></script>
+		<input  id="timetext" value="00:00:00" readonly><br>
+		<button type="button" onclick="start()">start</button>
+		<button type="button" onclick="stop()">stop</button>
+		<button type="button" onclick="Reset()">reset</button>
 		<div id="info"></div>
-
 	</body>
 </html>
