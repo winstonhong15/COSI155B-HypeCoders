@@ -100,20 +100,20 @@
 	}
 
 	function createMainScene(){
-		// TODO: setup lighting
+		// Setup lighting
 		var light1 = createPointLight();
 		light1.position.set(0,200,20);
 		scene.add(light1);
 		var light0 = new THREE.AmbientLight( 0xffffff,0.25);
 		scene.add(light0);
 
-		// TODO: create main camera
+		// Create main camera
 		camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
 		camera.position.set(0,50,0);
 		camera.lookAt(0,0,0);
 		gameState.camera = camera;
 
-		// TODO: create backgroud
+		// Create backgroud
 		var ground = createSkyBox('ground.png');
 		scene.add(ground);
 		//var skybox = createSkyBox('sky.jpg', 1);
@@ -127,9 +127,11 @@
 		// TODO: create car
 		createCar();
 
-		// TODO: create wall (track)
+		// Create wall (track)
 		createTrack();
 
+		// Add items
+		addItems();
 	}
 
 	function randN(n){
@@ -187,7 +189,7 @@
   	}
 
 	function createTrack(){
-		var geometry1 = new THREE.TorusGeometry( 30, 2, 40, 40);
+		var geometry1 = new THREE.TorusGeometry( 20, 2, 40, 40);
 		var material = new THREE.MeshLambertMaterial( { color: 0x994c00} );
 		var pmaterial = new Physijs.createMaterial(material,0, 0);
     	var wall1 = new Physijs.ConcaveMesh( geometry1, pmaterial, 0);
@@ -195,13 +197,57 @@
 		wall1.castShadow = true;
 		wall1.rotateX(Math.PI / 2);
 
-		var geometry2 = new THREE.TorusGeometry( 50, 2, 40, 40);
+		var geometry2 = new THREE.TorusGeometry( 60, 2, 40, 40);
 		var wall2 = new Physijs.ConcaveMesh( geometry2, pmaterial, 0);
 		wall1.__dirtyPosition = true;
 		wall2.__dirtyPosition = true;
 		wall2.rotateX(Math.PI / 2);
 		scene.add(wall1);
 		scene.add(wall2);
+	}
+
+	function createBox(){
+		var geometry = new THREE.BoxGeometry(2, 2, 2);
+		var material = new THREE.MeshLambertMaterial( { color: 0x994c00} );
+		var mesh = new Physijs.BoxMesh(geometry, material, 0);
+		
+		return mesh;
+	}
+
+	function createBall(){
+		var geometry = new THREE.SphereGeometry(2, 60, 60)
+		var material = new THREE.MeshLambertMaterial( { color: 0x994c00} );
+		var mesh = new Physijs.SphereMesh(geometry, material, 0);
+
+		return mesh;
+	}
+
+	function addItems(){
+		num = 5;
+		while(num > 0){
+			mesh = createBox();
+			addItem(mesh);
+			num -= 1;
+		}
+		num = 5;
+		while(num > 0){
+			mesh = createBall();
+			addItem(mesh);
+			num -= 1;
+		}
+	}
+
+	function addItem(mesh){
+		var xPoistive = false;
+		if (randN(1) >= 0.5) { xPoistive = true; }
+		var zPositve = false;
+		if (randN(1) >= 0.5) { zPoistive = true; }
+		x = randN(20) + 20;
+		z = randN(20) + 20;
+		if (!xPoistive) { x = -x; }
+		if (!zPositve) { z = -z; }
+		mesh.position.set(x, 0, z);
+		scene.add(mesh);
 	}
 
 	function createCar(){
@@ -231,7 +277,7 @@
 	   	);
 			*/
 
-		var geometry = new THREE.BoxGeometry(5,5,5);
+		var geometry = new THREE.BoxGeometry(4,2,4);
 		var material = new THREE.MeshLambertMaterial( { color: 0xffff00} );
   		var pmaterial = new Physijs.createMaterial(material,0.9,0.5);
   		car = new Physijs.BoxMesh( geometry, pmaterial );
