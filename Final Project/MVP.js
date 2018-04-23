@@ -24,7 +24,7 @@
 			speed:10, fly:false, reset:false,
 		    camera:camera}
 
-	var gameState = {time:0, lap:1, scene:'GameStart', camera: 'none' }
+	var gameState = {time:0, lap:1, lastLap:0, scene:'GameStart', camera: 'none' }
 
 	// Here is the main game control
 	init();
@@ -36,6 +36,7 @@
 		window.clearInterval(int);
 		millisecond=minute=second=0;
 		document.getElementById('timetext').value='00:00:000';
+		gameState.lap = 1;
 	}
 
 	function start(){
@@ -58,6 +59,15 @@
 
 	function stop(){
 		window.clearInterval(int);
+	}
+
+	function count(){
+		gameState.lastLap = minute+':'+second+':'+millisecond;
+		window.clearInterval(int);
+		millisecond=minute=second=0;
+		document.getElementById('timetext').value='00:00:000';
+		int=setInterval(timer,50);
+		gameState.lap+=1;
 	}
 
 	// TODO
@@ -210,7 +220,7 @@
 		var geometry = new THREE.BoxGeometry(2, 2, 2);
 		var material = new THREE.MeshLambertMaterial( { color: 0x994c00} );
 		var mesh = new Physijs.BoxMesh(geometry, material, 0);
-		
+
 		return mesh;
 	}
 
@@ -442,5 +452,6 @@
 		info.innerHTML='<div style="font-size:24pt">Time: '
 			+ gameState.time
 			+ ' Lap: ' + gameState.lap
+			+ 'Last Lap: '+ gameState.lastLap
     		+ '</div>';
 	}
