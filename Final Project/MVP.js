@@ -237,12 +237,26 @@
 		while(num > 0){
 			mesh = createBox();
 			addItem(mesh);
+			mesh.addEventListener( 'collision',
+				function(other_object) {
+					if (other_object==car){
+						cone.setLinearVelocity(new THREE.Vector3(5,0,5));
+					}
+				}
+			)
 			num -= 1;
 		}
 		num = 5;
 		while(num > 0){
 			mesh = createBall();
 			addItem(mesh);
+			mesh.addEventListener( 'collision',
+				function(other_object) {
+					if (other_object==car){
+						cone.setLinearVelocity(new THREE.Vector3(0,0,0));
+					}
+				}
+			)
 			num -= 1;
 		}
 	}
@@ -258,6 +272,7 @@
 		if (!zPositve) { z = -z; }
 		mesh.position.set(x, 0, z);
 		scene.add(mesh);
+
 	}
 
 	function createCar(){
