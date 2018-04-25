@@ -260,7 +260,7 @@
 			mesh.addEventListener( 'collision',
 				function(other_object) {
 					if (other_object==car){
-						car.setLinearVelocity(new THREE.Vector3(5,0,5));
+						controls.speed-=1;
 					}
 				}
 			)
@@ -273,7 +273,9 @@
 			mesh.addEventListener( 'collision',
 				function(other_object) {
 					if (other_object==car){
-						car.setLinearVelocity(new THREE.Vector3(0,0,0));
+						controls.speed+=0.7;
+						car.setAngularVelocity(new THREE.Vector3(0,0,controls.speed*0.05))
+
 					}
 				}
 			)
@@ -302,7 +304,7 @@
 	 				var material = new THREE.MeshLambertMaterial({color: 0xff8000});
 	 				var pmaterial = new Physijs.createMaterial(material, 0.9, 0.95);
 					car = new Physijs.BoxMesh(geometry, pmaterial);
-					car.position.set(0,10,-20);
+					car.position.set(0,10,-25);
 	 				car.translateY(20);
 	 				car.castShadow = true;
 	 				car.setDamping(1.0, 1.0);
@@ -334,6 +336,15 @@
     	mesh = new Physijs.BoxMesh( geometry, material, 0 );
     	mesh.castShadow = true;
     	return mesh;
+			mesh.addEventListener( 'collision',
+				function(other_object) {
+					if (other_object==car){
+						car.position.set(0,10,-25);
+						car.__dirtyPosition=true;
+						car.setAngularVelocity(new THREE.Vector3(controls.speed*0.1,controls.speed*0.1,controls.speed*0.1))
+					}
+				}
+			)
     }
 
 	function createSkyBox(image,k){
@@ -392,7 +403,11 @@
 			case "a": controls.left = true; break;
 			case "d": controls.right = true; break;
 			case "m": controls.speed = 30; break;
-      		case "h": controls.reset = true; break;
+      case "h": controls.reset = true;
+								controls.speed = 10;break;
+			case "j": car.translateY(10);
+								car.__dirtyPosition=true;
+								;break;
 
 			case "1": gameState.camera = camera; break;
 			case "2": gameState.camera = closeCam; break;
@@ -420,6 +435,7 @@
     	case "h": controls.reset = false; break;
 			case "q": carCam.left = false; closeCam.left=false;break;
 			case "e": carCam.right = false;closeCam.right=false;break;
+			case "j": car.translateY(-10); break;
 		}
 	}
 
