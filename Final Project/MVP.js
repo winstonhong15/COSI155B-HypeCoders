@@ -3,7 +3,7 @@
 */
 	// global varibales
 	var scene, renderer;
-	var camera, carCamera;
+	var camera, carCam,closeCam;
 	var wall1, wall2;
 	var minute=0;
 	var second=0;
@@ -120,7 +120,7 @@
 		camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
 		camera.position.set(0,80,0);
 		camera.lookAt(0,0,0);
-		gameState.camera = camera;
+		//gameState.camera = camera;
 
 		// Create backgroud
 		var ground = createGround('ground.png', 240, 20);
@@ -128,9 +128,13 @@
 		var skybox = createSkyBox('sky.jpg', 1);
 		scene.add(skybox);
 
+		closeCam = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 1000 );
+		closeCam.translateY(-4);
+		closeCam.translateZ(6);
+
 		carCam = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 1000 );
 		carCam.translateY(-4);
-		carCam.translateZ(3);
+		carCam.translateZ(6);
 		gameState.camera = carCam;
 
 		// Create car
@@ -233,7 +237,7 @@
 	}
 
 	function createBox(){
-		var geometry = new THREE.BoxGeometry(2, 2, 2);
+		var geometry = new THREE.BoxGeometry(5, 5, 5);
 		var material = new THREE.MeshLambertMaterial( { color: 0x994c00} );
 		var mesh = new Physijs.BoxMesh(geometry, material, 0);
 
@@ -292,45 +296,36 @@
 	}
 
 	function createCar(){
-		/*
 	 		var loader = new THREE.JSONLoader();
-	 		loader.load("modules/squirtle-pokemon-go.json",
-	 			function (geometry) {
-	 				var material = new THREE.MeshLambertMaterial({color: 0xffff00});
+	 		loader.load("car11.json",
+	 			function (geometry,materials) {
+	 				var material = new THREE.MeshLambertMaterial({color: 0xff8000});
 	 				var pmaterial = new Physijs.createMaterial(material, 0.9, 0.95);
 					car = new Physijs.BoxMesh(geometry, pmaterial);
-					car.position.set(20,0,20);
+					car.position.set(0,10,-20);
 	 				car.translateY(20);
 	 				car.castShadow = true;
 	 				car.setDamping(1.0, 1.0);
-					carCamera.position.set(20,0,20);
-					carCamera.lookAt(0,0,0);
+
+					closeCam.position.set(15,2,0);
+					closeCam.lookAt(0,4,10)
+
+					carCam.position.set(0,4,0);
+					carCam.lookAt(0,4,10)
+					/*
 	 				car.addEventListener('collision', function(other_object){
 						if (other_object == wall1 || other_object== wall2c){
 							console.log('hit wall');
 	 					}
 	 				})
+					*/
 	 				scene.add(car);
-	 				car.add(carCamera);
+	 				car.add(carCam);
+					car.add(closeCam);
 	 			},
 	 		function(xhr){console.log(xhr.loaded / xhr.total*100)+'% loaded'},
 	 		function(err){console.log("error in loading:" + err)}
 	   	);
-			*/
-
-		var geometry = new THREE.BoxGeometry(4,2,4);
-		var material = new THREE.MeshLambertMaterial( { color: 0xffff00} );
-  		var pmaterial = new Physijs.createMaterial(material,0.9,0.5);
-  		car = new Physijs.BoxMesh( geometry, pmaterial );
-  		car.position.set(25,2.5,25);
-  		car.setDamping(0.1,0.1);
-			carCam.position.set(0,4,0);
-			carCam.lookAt(0,4,10);
-  		car.castShadow = true;
-
-  		scene.add(car);
-			car.add(carCam);
-
 	}
 
     function createWall(color,w,h,d){
@@ -400,9 +395,17 @@
       		case "h": controls.reset = true; break;
 
 			case "1": gameState.camera = camera; break;
-			case "2": gameState.camera = carCam; break;
+			case "2": gameState.camera = closeCam; break;
+			case "3": gameState.camera = carCam; break;
 
 			// switch cameras
+
+			case "ArrowLeft": carCam.translateY(1);closeCam.translateY(1);break;
+			case "ArrowRight": carCam.translateY(-1);closeCam.translateY(-1);break;
+			case "ArrowUp": carCam.translateZ(-1);closeCam.translateZ(-1);break;
+			case "ArrowDown": carCam.translateZ(1);closeCam.translateZ(1);break;
+			case "q": carCam.left = true;closeCam.left=true;break;
+			case "e": carCam.right = true;closeCam.left=true;break;
 
 		}
 	}
@@ -414,12 +417,32 @@
 			case "a": controls.left  = false; break;
 			case "d": controls.right = false; break;
 			case "m": controls.speed = 10; break;
-    		case "h": controls.reset = false; break;
+    	case "h": controls.reset = false; break;
+			case "q": carCam.left = false; closeCam.left=false;break;
+			case "e": carCam.right = false;closeCam.right=false;break;
 		}
 	}
 
 	function degInRad(deg) {
     	return deg * Math.PI / 180;
+	}
+
+	function updateCarCam(){
+		if(carCam.left){
+			carCam.rotateOnAxis((new THREE.Vector3(0, 1, 0)).normalize(), degInRad(0.5));
+		}
+		if(carCam.right){
+			carCam.rotateOnAxis((new THREE.Vector3(0, 1, 0)).normalize(), degInRad(-0.5));
+		}
+	}
+
+	function updateCloseCam(){
+		if(closeCam.left){
+			closeCam.rotateOnAxis((new THREE.Vector3(0, 1, 0)).normalize(), degInRad(0.5));
+		}
+		if(closeCam.right){
+			closeCam.rotateOnAxis((new THREE.Vector3(0, 1, 0)).normalize(), degInRad(-0.5));
+		}
 	}
 
 	function updateCar() {
@@ -470,8 +493,10 @@
 				renderer.render(startScene,endCamera);
 				break;
 			case "main":
-				 updateCar();
-	    		scene.simulate();
+			  updateCloseCam();
+			  updateCarCam();
+			  updateCar();
+	    	scene.simulate();
 				if (gameState.camera!= 'none'){
 					renderer.render( scene, gameState.camera );
 				}
