@@ -70,10 +70,9 @@
 		gameState.lap+=1;
 	}
 
-	// TODO
 	function createEndScene(){
 		endScene = initScene();
-		endText = createSkyBox('end.png',10);
+		endText = createSkyBox('end.png',1);
 		//endText.rotateX(Math.PI);
 		endScene.add(endText);
 		var light1 = createPointLight();
@@ -84,10 +83,10 @@
 		endCamera.lookAt(0,0,0);
 	}
 
-	// TODO
 	function createStartScene(){
 		startScene = initScene();
-		startText = createSkyBox('start.png',10);
+		startText = createGround('start.png', 100, 1);
+		startText.rotateX(Math.PI);
 		startScene.add(startText);
 		var light1 = createPointLight();
 		light1.position.set(0,200,20);
@@ -119,22 +118,22 @@
 
 		// Create main camera
 		camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 0.1, 1000 );
-		camera.position.set(0,50,0);
+		camera.position.set(0,80,0);
 		camera.lookAt(0,0,0);
 		gameState.camera = camera;
 
 		// Create backgroud
-		var ground = createSkyBox('ground.png');
+		var ground = createGround('ground.png', 240, 20);
 		scene.add(ground);
-		//var skybox = createSkyBox('sky.jpg', 1);
-		//scene.add(skybox);
+		var skybox = createSkyBox('sky.jpg', 1);
+		scene.add(skybox);
 
 		carCam = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 1000 );
 		carCam.translateY(-4);
 		carCam.translateZ(3);
 		gameState.camera = carCam;
 
-		// TODO: create car
+		// Create car
 		createCar();
 
 		// Create wall (track)
@@ -183,15 +182,15 @@
 		return light;
 	}
 
-    function createGround(image){
+    function createGround(image, l, k){
   		// creating a textured plane which receives shadows
-		var geometry = new THREE.PlaneGeometry( 180, 180, 128 );
+		var geometry = new THREE.PlaneGeometry( l, l, 160 );
 		var texture = new THREE.TextureLoader().load( 'images/'+image );
 		texture.wrapS = THREE.RepeatWrapping;
 		texture.wrapT = THREE.RepeatWrapping;
-		texture.repeat.set( 15, 15 );
+		texture.repeat.set( k, k );
 		var material = new THREE.MeshLambertMaterial( { color: 0xffffff,  map: texture ,side:THREE.DoubleSide} );
-		var pmaterial = new Physijs.createMaterial(material,0.9,0.05);
+		var pmaterial = new Physijs.createMaterial(material,0.5,0.01);
 		var mesh = new Physijs.BoxMesh( geometry, pmaterial, 0 );
 		mesh.receiveShadow = true;
 		mesh.rotateX(Math.PI/2);
@@ -199,21 +198,38 @@
   	}
 
 	function createTrack(){
-		var geometry1 = new THREE.TorusGeometry( 20, 2, 40, 40);
+		var geometry1 = new THREE.TorusGeometry( 12, 4, 40, 40);
 		var material = new THREE.MeshLambertMaterial( { color: 0x994c00} );
 		var pmaterial = new Physijs.createMaterial(material,0, 0);
-    	var wall1 = new Physijs.ConcaveMesh( geometry1, pmaterial, 0);
+		var wall1 = new Physijs.ConvexMesh( geometry1, pmaterial, 0);
 		wall1.setDamping(0.1,0.1);
 		wall1.castShadow = true;
 		wall1.rotateX(Math.PI / 2);
 
-		var geometry2 = new THREE.TorusGeometry( 60, 2, 40, 40);
-		var wall2 = new Physijs.ConcaveMesh( geometry2, pmaterial, 0);
+		w0 = createWall(0x994c00, 120, 8, 4);
+		w0.__dirtyPosition = true;
+		w0.position.set(0, 0, 60);
+
+		w1 = createWall(0x994c00, 120, 8, 4);
+		w1.__dirtyPosition = true;
+		w1.position.set(0, 0, -60);
+
+		w2 = createWall(0x994c00, 120, 8, 4);
+		w2.__dirtyPosition = true;
+		w2.rotateY(Math.PI / 2);
+		w2.position.set(60, 0, 0);
+
+		w3 = createWall(0x994c00, 120, 8, 4);
+		w3.__dirtyPosition = true;
+		w3.rotateY(Math.PI / 2);
+		w3.position.set(-60, 0, 0);
+
 		wall1.__dirtyPosition = true;
-		wall2.__dirtyPosition = true;
-		wall2.rotateX(Math.PI / 2);
 		scene.add(wall1);
-		scene.add(wall2);
+		scene.add(w0);
+		scene.add(w1);
+		scene.add(w2);
+		scene.add(w3);
 	}
 
 	function createBox(){
@@ -240,7 +256,7 @@
 			mesh.addEventListener( 'collision',
 				function(other_object) {
 					if (other_object==car){
-						cone.setLinearVelocity(new THREE.Vector3(5,0,5));
+						car.setLinearVelocity(new THREE.Vector3(5,0,5));
 					}
 				}
 			)
@@ -253,7 +269,7 @@
 			mesh.addEventListener( 'collision',
 				function(other_object) {
 					if (other_object==car){
-						cone.setLinearVelocity(new THREE.Vector3(0,0,0));
+						car.setLinearVelocity(new THREE.Vector3(0,0,0));
 					}
 				}
 			)
@@ -327,11 +343,11 @@
 
 	function createSkyBox(image,k){
 		// creating a textured plane which receives shadows
-		var geometry = new THREE.SphereGeometry( 80, 80, 80 );
+		var geometry = new THREE.SphereGeometry( 180, 180, 180 );
 		var texture = new THREE.TextureLoader().load( 'images/'+image );
 		texture.wrapS = THREE.RepeatWrapping;
 		texture.wrapT = THREE.RepeatWrapping;
-		texture.repeat.set( 1, 1 );
+		texture.repeat.set( k, k );
 		var material = new THREE.MeshLambertMaterial( { color: 0xffffff,  map: texture ,side:THREE.DoubleSide} );
 		var mesh = new THREE.Mesh( geometry, material, 0 );
 		mesh.receiveShadow = false;
@@ -381,7 +397,7 @@
 			case "a": controls.left = true; break;
 			case "d": controls.right = true; break;
 			case "m": controls.speed = 30; break;
-      case "h": controls.reset = true; break;
+      		case "h": controls.reset = true; break;
 
 			case "1": gameState.camera = camera; break;
 			case "2": gameState.camera = carCam; break;
@@ -398,7 +414,7 @@
 			case "a": controls.left  = false; break;
 			case "d": controls.right = false; break;
 			case "m": controls.speed = 10; break;
-    	case "h": controls.reset = false; break;
+    		case "h": controls.reset = false; break;
 		}
 	}
 
@@ -428,6 +444,8 @@
 		if (controls.reset){
 			car.__dirtyPosition = true;
 			car.position.set(25,2.5,25);
+			car.__dirtyRotation = true;
+			car.rotation.set(0, 0, 0);
 		}
 
 	}
