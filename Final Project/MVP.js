@@ -260,7 +260,7 @@
 			mesh.addEventListener( 'collision',
 				function(other_object) {
 					if (other_object==car){
-						controls.speed-=1;
+						controls.speed-=5;
 					}
 				}
 			)
@@ -273,9 +273,10 @@
 			mesh.addEventListener( 'collision',
 				function(other_object) {
 					if (other_object==car){
-						controls.speed+=0.7;
+						controls.speed+=5;
 						car.setAngularVelocity(new THREE.Vector3(0,0,controls.speed*0.05))
-
+						//mesh.translateY(-10);
+						//mesh.__dirtyPosition=true;
 					}
 				}
 			)
@@ -294,6 +295,16 @@
 		if (!zPositve) { z = -z; }
 		mesh.position.set(x, 0, z);
 		scene.add(mesh);
+		mesh.addEventListener( 'collision',
+			function(other_object) {
+				if (other_object==car){
+					//controls.speed+=0.7;
+					//car.setAngularVelocity(new THREE.Vector3(0,0,controls.speed*0.05))
+					mesh.translateY(-10);
+					mesh.__dirtyPosition=true;
+				}
+			}
+		)
 
 	}
 
