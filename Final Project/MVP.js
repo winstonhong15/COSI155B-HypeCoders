@@ -228,27 +228,30 @@
 		w3.rotateY(Math.PI / 2);
 		w3.position.set(-60, 0, 0);
 
-		wall1.__dirtyPosition = true;
+		// this marks the start point
+		w4 = createWall(0xFF0000, 48, 2, 2);
+		w4.__dirtyPosition = true;
+		w4.position.set(36, -0.99, 0)
+
 		scene.add(wall1);
 		scene.add(w0);
 		scene.add(w1);
 		scene.add(w2);
 		scene.add(w3);
+		scene.add(w4);
 	}
 
 	function createBox(){
 		var geometry = new THREE.BoxGeometry(5, 5, 5);
-		var material = new THREE.MeshLambertMaterial( { color: 0x994c00} );
+		var material = new THREE.MeshLambertMaterial( { color: 0xFF0000} );
 		var mesh = new Physijs.BoxMesh(geometry, material, 0);
-
 		return mesh;
 	}
 
 	function createBall(){
 		var geometry = new THREE.SphereGeometry(2, 60, 60)
-		var material = new THREE.MeshLambertMaterial( { color: 0x994c00} );
+		var material = new THREE.MeshLambertMaterial( { color: 0x0000FF} );
 		var mesh = new Physijs.SphereMesh(geometry, material, 0);
-
 		return mesh;
 	}
 
@@ -260,7 +263,7 @@
 			mesh.addEventListener( 'collision',
 				function(other_object) {
 					if (other_object==car){
-						controls.speed-=5;
+						controls.speed-=3;
 					}
 				}
 			)
@@ -274,9 +277,6 @@
 				function(other_object) {
 					if (other_object==car){
 						controls.speed+=5;
-						car.setAngularVelocity(new THREE.Vector3(0,0,controls.speed*0.05))
-						//mesh.translateY(-10);
-						//mesh.__dirtyPosition=true;
 					}
 				}
 			)
@@ -285,21 +285,20 @@
 	}
 
 	function addItem(mesh){
-		var xPoistive = false;
-		if (randN(1) >= 0.5) { xPoistive = true; }
-		var zPositve = false;
-		if (randN(1) >= 0.5) { zPoistive = true; }
-		x = randN(20) + 20;
-		z = randN(20) + 20;
-		if (!xPoistive) { x = -x; }
-		if (!zPositve) { z = -z; }
-		mesh.position.set(x, 0, z);
+		var xPositive = false;
+		if (Math.random() >= 0.5) { xPositive = true; }
+		var zPositive = false;
+		if (Math.random() >= 0.5) { zPositive = true; }
+		x = randN(40) + 10;
+		z = randN(40) + 10;
+		if (!xPositive) { x = -x; }
+		if (!zPositive) { z = -z; }
+		mesh.position.set(x, 2, z)
+		mesh.__dirtyPosition = true
 		scene.add(mesh);
 		mesh.addEventListener( 'collision',
 			function(other_object) {
 				if (other_object==car){
-					//controls.speed+=0.7;
-					//car.setAngularVelocity(new THREE.Vector3(0,0,controls.speed*0.05))
 					mesh.translateY(-10);
 					mesh.__dirtyPosition=true;
 				}
